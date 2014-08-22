@@ -40,7 +40,6 @@ class Module {
         $result = null;
         list ($module_name, $parameter) = $this->get_current();
         // debug('page', $this->page);
-        include_once('library/Module_abstract.php');
         $result = "<p>Module ".$module_name." is not valid.</p>\n";
         $module_file = 'module/'.$module_name.'.php';
         if (file_exists($module_file)) {
