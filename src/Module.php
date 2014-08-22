@@ -1,4 +1,6 @@
 <?php
+namespace Aoloe;
+
 use function Aoloe\debug as debug;
 
 class Module {
