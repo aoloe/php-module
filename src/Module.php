@@ -1,7 +1,7 @@
 <?php
 namespace Aoloe;
 
-use function Aoloe\debug as debug;
+// use function Aoloe\debug as debug;
 
 class Module {
     private $module = null;
@@ -105,8 +105,6 @@ class Module {
         return array($module_name, $parameter);
     }
 }
-
-<?php
 
 class Module_abstract {
     protected $site = null;
