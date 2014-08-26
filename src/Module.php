@@ -12,9 +12,22 @@ class Module {
     }
     public function set_module($module) {$this->module = $module;}
     public function set_parameter($parameter) {$this->parameter = $parameter;}
+    public function add_parameter($parameter) {
+        if (isset($parameter) && is_array($parameter)) {
+            if (is_null($this->parameter)) {
+                $this->parameter = $parameter;
+            } else {
+                $this->parameter += $parameter;
+            }
+        }
+    }
+    private $filter = null;
+    public function set_filter($filter) {$this->filter = $filter;}
 
     private $page = null;
     public function set_page($page) {$this->page = $page;}
+    private $page_url = null;
+    public function set_page_url($url) {$this->page_url = $url;}
     private $page_query = null;
 
     private $site = null;
@@ -38,8 +51,17 @@ class Module {
      */
     public function get_rendered() {
         $result = null;
+        $filter = null;
         list ($module_name, $parameter) = $this->get_current();
         // debug('page', $this->page);
+        // debug('module_name', $module_name);
+        if (array_key_exists('module', $this->page) && array_key_exists('filter', $this->page['module'])) {
+            $filter = $this->page['module']['filter'];
+            if (!is_array($filter)) {
+                $filter = array($filter);
+            }
+        }
+        // debug('module_name', $module_name);
         $result = "<p>Module ".$module_name." is not valid.</p>\n";
         $module_file = 'module/'.$module_name.'.php';
         if (file_exists($module_file)) {
@@ -47,6 +69,7 @@ class Module {
             if (class_exists($module_name)) {
                 $module = new $module_name();
                 $module->set_site($this->site);
+                $module->set_page_url($this->page_url);
                 // debug('parameter', $parameter);
                 if (isset($parameter)) {
                     foreach ($parameter as $key => $value) {
@@ -57,6 +80,9 @@ class Module {
                         }
                     }
                 }
+                if (isset($filter)) {
+                    $module->set_filter($filter);
+                }
                 $result = $module->get_content();
             }
         }
@@ -66,25 +92,28 @@ class Module {
     private function get_current() {
         $module_name = null;
         $parameter = null;
-        //debug('page', $this->page);
+        // debug('page', $this->page);
         $parameter = isset($this->parameter) ? $this->parameter : array();
         if (isset($this->module)) {
             $module_name = $this->module;
         } elseif (isset($this->page)) {
             if (array_key_exists('module', $this->page)) {
                 if (is_array($this->page['module'])) {
-                    $module_name = $this->page['module']['name'];
+                    if (array_key_exists('name', $this->page['module'])) {
+                        $module_name = $this->page['module']['name'];
+                    }
                     if (array_key_exists('parameter', $this->page['module'])) {
                         $parameter = array_merge($parameter, $this->page['module']['parameter']);
                     }
                 } else {
                     $module_name = $this->page['module'];
                 }
-            } else {
-                $module_name = $this->module_default;
             }
         } else {
             list($module_name, $parameter) = $this->get_error();
+        }
+        if (is_null($module_name)) {
+            $module_name = $this->module_default;
         }
         return array($module_name, $parameter);
     }
@@ -108,5 +137,11 @@ class Module {
 class Module_abstract {
     protected $site = null;
     public function set_site($site) {$this->site = $site;}
+    protected $page_url = null;
+    public function set_page_url($page_url) {$this->page_url = $page_url;}
+    protected $filter = null;
+    public function set_filter($filter) {$this->filter = $filter;}
+    protected $language = null;
+    public function set_language($language) {$this->language = $language;}
 }
 
