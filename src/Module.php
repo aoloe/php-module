@@ -55,7 +55,7 @@ class Module {
         list ($module_name, $parameter) = $this->get_current();
         // debug('page', $this->page);
         // debug('module_name', $module_name);
-        if (array_key_exists('module', $this->page) && array_key_exists('filter', $this->page['module'])) {
+        if (array_key_exists('module', $this->page) && is_array($this->page['module']) && array_key_exists('filter', $this->page['module'])) {
             $filter = $this->page['module']['filter'];
             if (!is_array($filter)) {
                 $filter = array($filter);
