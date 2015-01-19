@@ -6,7 +6,7 @@ namespace Aoloe;
 class Module {
     private $module = null;
     private $parameter = null;
-    public function set($module, $parameter) {
+    public function set($current, $parameter) {
         $this->module = $current;
         $this->parameter = $parameter;
     }
@@ -27,8 +27,12 @@ class Module {
     private $page = null;
     public function set_page($page) {$this->page = $page;}
     private $page_url = null;
+    /*
     public function set_page_url($url) {$this->page_url = $url;}
     private $page_query = null;
+    */
+    public function set_url_structure($url) {$this->url_structure = $url;}
+    private $url_structure = null;
 
     private $site = null;
     public function set_site($site) {$this->site = $site;}
@@ -53,8 +57,10 @@ class Module {
         $result = null;
         $filter = null;
         list ($module_name, $parameter) = $this->get_current();
-        // debug('page', $this->page);
+        // debug('parameter', $parameter);
         // debug('module_name', $module_name);
+        // debug('url_structure', $this->url_structure);
+        // debug('page', $this->page);
         if (array_key_exists('module', $this->page) && is_array($this->page['module']) && array_key_exists('filter', $this->page['module'])) {
             $filter = $this->page['module']['filter'];
             if (!is_array($filter)) {
@@ -69,7 +75,8 @@ class Module {
             if (class_exists($module_name)) {
                 $module = new $module_name();
                 $module->set_site($this->site);
-                $module->set_page_url($this->page_url);
+                // $module->set_page_url($this->page_url); // TODO: correctly set the page_url
+                $module->set_page_url($this->url_structure);
                 // debug('parameter', $parameter);
                 if (isset($parameter)) {
                     foreach ($parameter as $key => $value) {
