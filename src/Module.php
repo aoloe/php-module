@@ -33,6 +33,10 @@ class Module {
     */
     public function set_url_structure($url) {$this->url_structure = $url;}
     private $url_structure = null;
+    public function set_url_query($url) {$this->url_query = $url;}
+    private $url_query = null;
+    public function set_url_request($url) {$this->url_request = $url;}
+    private $url_request = null;
 
     private $site = null;
     public function set_site($site) {$this->site = $site;}
@@ -77,6 +81,8 @@ class Module {
                 $module->set_site($this->site);
                 // $module->set_page_url($this->page_url); // TODO: correctly set the page_url
                 $module->set_page_url($this->url_structure);
+                $module->set_url_request($this->url_request);
+                $module->set_url_query($this->url_query);
                 // debug('parameter', $parameter);
                 if (isset($parameter)) {
                     foreach ($parameter as $key => $value) {
@@ -147,6 +153,10 @@ class Module_abstract {
     protected $page_url = null;
     public function set_page_url($page_url) {$this->page_url = $page_url;}
     protected $filter = null;
+    public function set_url_query($url) {$this->url_query = $url;}
+    protected $url_query = null;
+    public function set_url_request($url) {$this->url_request = $url;}
+    protected $url_request = null;
     public function set_filter($filter) {$this->filter = $filter;}
     protected $language = null;
     public function set_language($language) {$this->language = $language;}
