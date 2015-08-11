@@ -41,6 +41,9 @@ class Module {
     private $site = null;
     public function set_site($site) {$this->site = $site;}
 
+    protected $configuration = null;
+    public function set_configuration($configuration) {$this->configuration = $configuration;}
+
     private $module_default = 'Page';
     public function set_module_default($module) {$this->module_default = $module_404;}
     private $module_404 = 'Error_404';
@@ -83,6 +86,7 @@ class Module {
                 $module->set_page_url($this->url_structure);
                 $module->set_url_request($this->url_request);
                 $module->set_url_query($this->url_query);
+                $module->set_configuration($this->configuration);
                 // debug('parameter', $parameter);
                 if (isset($parameter)) {
                     foreach ($parameter as $key => $value) {
@@ -160,5 +164,7 @@ class Module_abstract {
     public function set_filter($filter) {$this->filter = $filter;}
     protected $language = null;
     public function set_language($language) {$this->language = $language;}
+    protected $configuration = null;
+    public function set_configuration($configuration) {$this->configuration = $configuration;}
 }
 
