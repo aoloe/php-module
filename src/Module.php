@@ -5,12 +5,13 @@ namespace Aoloe;
 
 class Module {
     private $module = null;
+    private $module_name = null;
     private $parameter = null;
     public function set($current, $parameter) {
-        $this->module = $current;
+        $this->module_name = $current;
         $this->parameter = $parameter;
     }
-    public function set_module($module) {$this->module = $module;}
+    public function set_module($module) {$this->module_name = $module;}
     public function set_parameter($parameter) {$this->parameter = $parameter;}
     public function add_parameter($parameter) {
         if (isset($parameter) && is_array($parameter)) {
@@ -54,65 +55,82 @@ class Module {
     private $redirect_301 = null; // array of urls to be redirected if not found and target
     public function set_redirect_301($redirect) {$this->redirect_301 = $redirect_301;}
 
-
-
-    /**
-     * @return if null no further rendering necessary, otherwise integrage
-     * the returned value in the main template's content
-     */
-    public function get_rendered() {
-        $result = null;
-        $filter = null;
-        list ($module_name, $parameter) = $this->get_current();
-        // debug('parameter', $parameter);
-        // debug('module_name', $module_name);
-        // debug('url_structure', $this->url_structure);
-        // debug('page', $this->page);
+    public function initialize() {
         if (array_key_exists('module', $this->page) && is_array($this->page['module']) && array_key_exists('filter', $this->page['module'])) {
             $filter = $this->page['module']['filter'];
             if (!is_array($filter)) {
                 $filter = array($filter);
             }
         }
+        list ($this->module_name, $parameter) = $this->get_current();
+        $this->module = $this->get_module($this->module_name);
+        if (isset($this->module)) {
+            $this->module->set_site($this->site);
+            // $module->set_page_url($this->page_url); // TODO: correctly set the page_url
+            $this->module->set_page_url($this->url_structure);
+            $this->module->set_url_request($this->url_request);
+            $this->module->set_url_query($this->url_query);
+            $this->module->set_configuration($this->configuration);
+            // debug('parameter', $parameter);
+            if (isset($parameter)) {
+                foreach ($parameter as $key => $value) {
+                    if (method_exists(get_class($this->module), 'set_'.$key)) {
+                        // debug('key', $key);
+                        // debug('value', $value);
+                        $this->module->{'set_'.$key}($value);
+                    }
+                }
+            }
+            if (isset($filter)) {
+                $this->module->set_filter($filter);
+            }
+        }
+    }
+
+    /**
+     * @return if null no further rendering necessary, otherwise integrate
+     * the returned value in the main template's content
+     */
+    public function get_rendered() {
+        $result = null;
+        if (!isset($this->module)) { // TODO: temporary workardound for the site that have been created before introduction of initialize()
+            $this->initialize();
+        }
+        // debug('parameter', $parameter);
         // debug('module_name', $module_name);
-        $result = "<p>Module ".$module_name." is not valid.</p>\n";
+        // debug('url_structure', $this->url_structure);
+        // debug('page', $this->page);
+        // debug('module_name', $module_name);
+        // debug('module_name', $module_name);
+        $result = "<p>Module ".$this->module_name." is not valid.</p>\n";
+        if (isset($this->module)) {
+            $result = $this->module->get_content();
+        }
+        return $result;
+    }
+
+    private function get_module($module_name) {
+        $result = null;
         $module_file = 'module/'.$module_name.'.php';
         if (file_exists($module_file)) {
             include_once($module_file);
             if (class_exists($module_name)) {
-                $module = new $module_name();
-                $module->set_site($this->site);
-                // $module->set_page_url($this->page_url); // TODO: correctly set the page_url
-                $module->set_page_url($this->url_structure);
-                $module->set_url_request($this->url_request);
-                $module->set_url_query($this->url_query);
-                $module->set_configuration($this->configuration);
-                // debug('parameter', $parameter);
-                if (isset($parameter)) {
-                    foreach ($parameter as $key => $value) {
-                        if (method_exists(get_class($module), 'set_'.$key)) {
-                            // debug('key', $key);
-                            // debug('value', $value);
-                            $module->{'set_'.$key}($value);
-                        }
-                    }
-                }
-                if (isset($filter)) {
-                    $module->set_filter($filter);
-                }
-                $result = $module->get_content();
+                $result = new $module_name();
             }
         }
         return $result;
     }
 
+    /**
+     * @return the current module name and the defined parameters
+     */
     private function get_current() {
         $module_name = null;
         $parameter = null;
         // debug('page', $this->page);
         $parameter = isset($this->parameter) ? $this->parameter : array();
-        if (isset($this->module)) {
-            $module_name = $this->module;
+        if (isset($this->module_name)) {
+            $module_name = $this->module_name;
         } elseif (isset($this->page)) {
             if (array_key_exists('module', $this->page)) {
                 if (is_array($this->page['module'])) {
